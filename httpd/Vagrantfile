@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "centos/7"
+    config.vm.box_version = "1905.1"
+
+    config.vm.provision "shell", inline: <<-SHELL
+    yum install epel-release -y 
+    yum install spawn-fcgi php php-cli mod_fcgid httpd -y
+    
+    # Copy unit config
+    cp /vagrant/httpd-{first,second} /etc/sysconfig/
+
+    # Copy apache configs
+    cp /vagrant/{first,second}.conf /etc/httpd/conf/
+
+    # Install apache unit
+    cp /vagrant/httpd@.service /usr/lib/systemd/system/
+
+    # Test first config
+    systemctl start httpd@first
+    ss -tnulp | grep httpd
+    systemctl stop httpd@first
+
+    # Test second config
+    systemctl start httpd@second
+    ss -tnulp | grep httpd
+
+    SHELL
+end

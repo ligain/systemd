@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "centos/7"
+    config.vm.box_version = "1905.1"
+
+    config.vm.provision "shell", inline: <<-SHELL
+    yum install epel-release -y 
+    yum install spawn-fcgi php php-cli mod_fcgid httpd -y
+
+    cp /vagrant/spawn-fcgi /etc/sysconfig/spawn-fcgi
+    cp /vagrant/spawn-fcgi.service  /etc/systemd/system/
+
+    systemctl start spawn-fcgi
+    systemctl status spawn-fcgi
+    SHELL
+end
